@@ -1,0 +1,12 @@
+name = "ai-automation-preview"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# Static landing page + workflow preview lives in ./public
+assets = { directory = "./public", binding = "ASSETS", run_worker_first = ["/api/*"] }
+
+[vars]
+# Groq model used for previews. Change here if you swap models.
+GROQ_MODEL = "qwen/qwen3.8-27b"
+
+# Set the secret with:  npx wrangler secret put GROQ_API_KEY
