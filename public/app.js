@@ -212,3 +212,10 @@ const io = new IntersectionObserver(
   { threshold: 0.12 }
 );
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+// "See the workflows" scrolls without changing the URL
+document.querySelectorAll("[data-scroll]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.getElementById(btn.dataset.scroll).scrollIntoView({ behavior: "smooth" });
+  });
+});
