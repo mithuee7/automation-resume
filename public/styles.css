@@ -1,9 +1,3 @@
-@property --angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
 :root {
   --bg: #07070b;
   --panel: #0f0f17;
@@ -28,19 +22,6 @@ body {
   line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse at top, #000 20%, transparent 75%);
-  pointer-events: none;
-  z-index: -2;
 }
 
 h1, h2, h3 {
@@ -70,8 +51,7 @@ a { color: inherit; text-decoration: none; }
 .btn:hover { transform: translateY(-2px); }
 .btn.primary {
   color: #0b0b12;
-  background: linear-gradient(120deg, var(--a), var(--b));
-  box-shadow: 0 10px 40px -10px rgba(167, 139, 250, 0.6);
+  background: var(--text);
 }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
@@ -90,37 +70,12 @@ a { color: inherit; text-decoration: none; }
 .lead { font-size: 1.15rem; max-width: 560px; margin: 0 auto 40px; }
 .cta { display: flex; justify-content: center; }
 
-/* Gradient text with a morphing bubble behind it */
+/* Accent word, solid color */
 .hl {
-  position: relative;
   display: inline-block;
-  isolation: isolate;
-  padding: 0 0.12em;
   white-space: nowrap;
 }
-.hl-blob {
-  position: absolute;
-  inset: -0.12em -0.35em;
-  z-index: -1;
-  background: linear-gradient(120deg, var(--a), var(--b), var(--c));
-  opacity: 0.32;
-  filter: blur(14px);
-  animation: morph 7s ease-in-out infinite;
-}
-.hl-text {
-  background: linear-gradient(90deg, var(--a), var(--b), var(--c), var(--a));
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 6s linear infinite;
-}
-@keyframes morph {
-  0%, 100% { border-radius: 58% 42% 55% 45% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
-  33% { border-radius: 42% 58% 40% 60% / 60% 40% 60% 40%; transform: scale(1.06) rotate(4deg); }
-  66% { border-radius: 50% 50% 45% 55% / 45% 55% 45% 55%; transform: scale(0.97) rotate(-3deg); }
-}
-@keyframes shimmer { to { background-position: 300% 0; } }
+.hl-text { color: var(--a); }
 
 /* ---------- Workflow blocks ---------- */
 #workflows { padding-bottom: 100px; }
@@ -132,7 +87,7 @@ a { color: inherit; text-decoration: none; }
   padding: 40px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent), var(--panel);
+  background: var(--panel);
   margin-bottom: 32px;
 }
 .wf-num {
@@ -150,7 +105,7 @@ a { color: inherit; text-decoration: none; }
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: linear-gradient(120deg, var(--a), var(--b));
+  background: var(--b);
   margin-right: 10px;
   vertical-align: middle;
 }
@@ -209,32 +164,8 @@ a { color: inherit; text-decoration: none; }
   font-size: 32px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-/* Rotating ring that travels around the corners, like n8n's running highlight */
-.tile::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 25px;
-  padding: 3px;
-  background: conic-gradient(
-    from var(--angle),
-    transparent 0deg,
-    transparent 210deg,
-    var(--a) 280deg,
-    var(--b) 320deg,
-    transparent 360deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-.node.running .tile::before { opacity: 1; animation: spin 1.2s linear infinite; }
-.node.running .tile { box-shadow: 0 0 34px rgba(167, 139, 250, 0.3); border-color: transparent; }
+.node.running .tile { border-color: var(--a); box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.14); }
 .node.done .tile { border-color: rgba(34, 211, 238, 0.45); }
-@keyframes spin { to { --angle: 360deg; } }
 
 .badge {
   position: absolute;
@@ -296,7 +227,7 @@ a { color: inherit; text-decoration: none; }
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--a), var(--b));
+  background: var(--b);
   animation: flow 0.8s ease forwards;
 }
 @keyframes flow { from { transform: translateX(-100%); } to { transform: none; } }
