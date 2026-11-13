@@ -305,14 +305,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Chat-style result thread */
-.thread { flex: 1; display: grid; gap: 10px; min-width: 0; }
+.thread { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
 .bubble.in { border-radius: 16px 16px 16px 4px; }
 .bubble.out {
   border-radius: 16px 16px 4px 16px;
   background: rgba(167, 139, 250, 0.1);
   border-color: rgba(167, 139, 250, 0.35);
-  margin-left: 22%;
+  width: 80%;
+  justify-self: end;
 }
 .in-text, .out-text { color: var(--text); font-size: 0.95rem; word-break: break-word; }
 .in-text { color: var(--muted); }
-@media (max-width: 560px) { .bubble.out { margin-left: 0; } }
+@media (max-width: 560px) { .bubble.out { width: 100%; } }
