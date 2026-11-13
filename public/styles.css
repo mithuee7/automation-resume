@@ -164,29 +164,23 @@ a { color: inherit; text-decoration: none; }
   font-size: 32px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-@property --angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-/* Ring that travels around the running node */
+/* Single-colour arc that travels around the running node */
 .tile::before {
   content: "";
   position: absolute;
-  inset: -3px;
-  border-radius: 25px;
-  padding: 3px;
-  background: conic-gradient(from var(--angle), transparent 0deg, transparent 210deg, var(--a) 280deg, var(--b) 320deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  inset: -4px;
+  border-radius: 26px;
+  border: 2px solid transparent;
+  border-top-color: var(--a);
+  border-right-color: rgba(167, 139, 250, 0.45);
+  border-bottom-color: rgba(167, 139, 250, 0.18);
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;
 }
-.node.running .tile::before { opacity: 1; animation: spin 1.2s linear infinite; }
-.node.running .tile { border-color: transparent; box-shadow: 0 0 34px rgba(167, 139, 250, 0.3); }
-@keyframes spin { to { --angle: 360deg; } }
+.node.running .tile::before { opacity: 1; animation: spin 1s linear infinite; }
+.node.running .tile { border-color: transparent; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .node.done .tile { border-color: rgba(34, 211, 238, 0.45); }
 
 .badge {
@@ -201,7 +195,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 .node.running .badge { background: var(--b); animation: pulse 1s infinite; }
-.node.done .badge { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.node.done .badge { background: var(--ok); }
 @keyframes pulse { 50% { opacity: 0.3; } }
 
 .label {
@@ -230,10 +224,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   line-height: 1.4;
   word-break: break-word;
-  opacity: 0.35;
-  transition: opacity 0.3s;
 }
-.node.done .out, .node.running .out { opacity: 1; }
 .node.running .out { color: var(--muted); }
 
 /* Connector between square nodes */
@@ -304,16 +295,29 @@ a { color: inherit; text-decoration: none; }
   .reveal { opacity: 1; transform: none; }
 }
 
-/* Chat-style result thread */
-.thread { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
-.bubble.in { border-radius: 16px 16px 16px 4px; }
-.bubble.out {
-  border-radius: 16px 16px 4px 16px;
-  background: rgba(167, 139, 250, 0.1);
-  border-color: rgba(167, 139, 250, 0.35);
-  width: 80%;
-  justify-self: end;
+/* Chat thread: full-strength text, counter top right */
+.canvas { position: relative; }
+.samples { padding-right: 120px; }
+.run-count {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: var(--panel);
 }
-.in-text, .out-text { color: var(--text); font-size: 0.95rem; word-break: break-word; }
-.in-text { color: var(--muted); }
-@media (max-width: 560px) { .bubble.out { width: 100%; } }
+.thread { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; max-height: 420px; overflow-y: auto; }
+.bubble { min-height: 0; padding: 12px 14px; }
+.bubble p { color: var(--text); opacity: 1; font-size: 0.95rem; line-height: 1.5; word-break: break-word; }
+.bubble.in { align-self: flex-start; width: 84%; background: var(--panel); border-radius: 16px 16px 16px 4px; }
+.bubble.out { align-self: flex-end; width: 84%; background: rgba(167, 139, 250, 0.14); border-color: rgba(167, 139, 250, 0.4); border-radius: 16px 16px 4px 16px; }
+.hint { color: var(--muted); font-size: 0.95rem; padding: 12px 0; }
+.bottom { align-items: flex-end; }
+@media (max-width: 560px) {
+  .bubble.in, .bubble.out { width: 100%; }
+  .samples { padding-right: 0; padding-top: 34px; }
+}
