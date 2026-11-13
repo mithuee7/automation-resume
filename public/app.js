@@ -169,6 +169,8 @@ const LEAD_FALLBACK = {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const randomDelay = () => NODE_DELAY_MIN + Math.random() * (NODE_DELAY_MAX - NODE_DELAY_MIN);
+// The caller or client takes 1 to 3 seconds to reply.
+const replyDelay = () => 1000 + Math.random() * 2000;
 
 async function post(path, body) {
   try {
@@ -279,7 +281,6 @@ function addBubble(article, kind, text) {
   div.innerHTML = `<span class="bubble-label">${kind === "in" ? "Incoming" : "Reply"}</span><p></p>`;
   div.querySelector("p").textContent = text;
   thread.appendChild(div);
-  thread.scrollTop = thread.scrollHeight;
 }
 
 // Runs the node pipeline once for a single message. The real Groq call starts at the AI node.
@@ -354,7 +355,7 @@ async function runWorkflow(wf, article) {
       // A caller keeps talking until their issue is solved, up to MAX_RUNS turns.
       let message = await varyCustomer(wf, sample);
       for (let n = 1; n <= MAX_RUNS; n++) {
-        if (n > 1) message = await varyCaller(history, n);
+        if (n > 1) [message] = await Promise.all([varyCaller(history, n), sleep(replyDelay())]);
         await turn(message, n);
       }
     } else if (wf.id === "booking") {
@@ -366,7 +367,7 @@ async function runWorkflow(wf, article) {
         await turn(message, n);
         if (agreed || n >= MAX_RUNS) break;
         agreed = Math.random() < 0.5;
-        message = await varyLead(agreed ? "agree" : "disagree", history);
+        [message] = await Promise.all([varyLead(agreed ? "agree" : "disagree", history), sleep(replyDelay())]);
         n++;
       }
     } else {
