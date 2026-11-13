@@ -204,6 +204,7 @@ function buildWorkflow(wf) {
   article.className = "wf reveal";
   article.id = wf.id;
   article.dataset.sample = wf.samples[0].id;
+  article.dataset.multi = wf.multi ? "1" : "";
   article.innerHTML = `
     <div class="wf-info">
       <span class="wf-num">${wf.num}</span>
@@ -212,7 +213,7 @@ function buildWorkflow(wf) {
       <ul>${wf.points.map((p) => `<li>${p}</li>`).join("")}</ul>
     </div>
     <div class="canvas">
-      <span class="run-count">1×</span>
+      <span class="run-count" hidden>1×</span>
       <div class="samples">
         ${wf.samples.map((s, i) => `<button class="chip${i === 0 ? " on" : ""}" data-id="${s.id}">${s.label}</button>`).join("")}
       </div>
@@ -258,13 +259,16 @@ function resetNodes(article) {
 
 function resetCanvas(article) {
   resetNodes(article);
-  setCount(article, 1);
+  setCount(article, null);
   const thread = article.querySelector(".thread");
   thread.innerHTML = '<p class="hint">Press run to see it work.</p>';
 }
 
+// The run counter only shows for multi-turn workflows (calls and bookings), and only while a run is in progress.
 function setCount(article, n) {
-  article.querySelector(".run-count").textContent = `${n}×`;
+  const el = article.querySelector(".run-count");
+  el.textContent = `${n}×`;
+  el.hidden = !article.dataset.multi || n == null;
 }
 
 function addBubble(article, kind, text) {

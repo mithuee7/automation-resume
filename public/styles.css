@@ -164,23 +164,36 @@ a { color: inherit; text-decoration: none; }
   font-size: 32px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-/* Single-colour arc that travels around the running node */
+/* Single-colour arc that travels around the outside of the running node */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
 .tile::before {
   content: "";
   position: absolute;
-  inset: -4px;
-  border-radius: 26px;
-  border: 2px solid transparent;
-  border-top-color: var(--a);
-  border-right-color: rgba(167, 139, 250, 0.45);
-  border-bottom-color: rgba(167, 139, 250, 0.18);
+  inset: -5px;
+  border-radius: 27px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0deg,
+    transparent 200deg,
+    rgba(167, 139, 250, 0.25) 260deg,
+    rgba(167, 139, 250, 0.6) 310deg,
+    var(--a) 340deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;
 }
-.node.running .tile::before { opacity: 1; animation: spin 1s linear infinite; }
-.node.running .tile { border-color: transparent; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.node.running .tile::before { opacity: 1; animation: spin 1.2s linear infinite; }
+@keyframes spin { to { --angle: 360deg; } }
 .node.done .tile { border-color: rgba(34, 211, 238, 0.45); }
 
 .badge {
@@ -298,6 +311,7 @@ a { color: inherit; text-decoration: none; }
 /* Chat thread: full-strength text, counter top right */
 .canvas { position: relative; }
 .samples { padding-right: 120px; }
+.run-count[hidden] { display: none; }
 .run-count {
   position: absolute;
   top: 22px;
@@ -311,7 +325,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--panel);
 }
 .thread { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; max-height: 420px; overflow-y: auto; }
-.bubble { min-height: 0; padding: 12px 14px; }
+.bubble { flex: none; min-height: 0; padding: 12px 14px; }
 .bubble p { color: var(--text); opacity: 1; font-size: 0.95rem; line-height: 1.5; word-break: break-word; }
 .bubble.in { align-self: flex-start; width: 84%; background: var(--panel); border-radius: 16px 16px 16px 4px; }
 .bubble.out { align-self: flex-end; width: 84%; background: rgba(167, 139, 250, 0.14); border-color: rgba(167, 139, 250, 0.4); border-radius: 16px 16px 4px 16px; }
