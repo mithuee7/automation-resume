@@ -1,80 +1,152 @@
 // Workflow definitions. Each node has a render(data, input) that returns the text shown under it.
 const WORKFLOWS = [
   {
-    id: "comment",
+    id: "instant",
     num: "01",
-    title: "Comment replies",
-    desc: "People comment on your posts all day. If nobody replies fast, they lose interest and move on. This replies for you in seconds.",
+    title: "Instant lead response",
+    desc: "A new message on Instagram or WhatsApp gets a reply in seconds, day or night. Leads who wait lose interest, so this answers them while they're still interested.",
     points: [
-      "Understands what each person is asking or feeling",
-      "Replies in your tone, without making up prices",
-      "Moves price questions and complaints into a private message",
+      "Replies to new Instagram and WhatsApp messages in seconds",
+      "Rates each lead as hot, warm or cold",
+      "Stays in your tone and never invents prices",
     ],
     samples: [
-      { id: "c1", label: "Price question", text: "Hey! How much does this cost? 👀" },
-      { id: "c2", label: "Compliment", text: "Love this so much, your content is always 🔥" },
-      { id: "c3", label: "Complaint", text: "I ordered 3 days ago and still no reply from anyone." },
+      { id: "l1", label: "Asks availability", text: "Hi! Do you have any slots this week?" },
+      { id: "l2", label: "Asks pricing", text: "How much is the basic package?" },
+      { id: "l3", label: "Just browsing", text: "Just browsing, thanks" },
     ],
     nodes: [
-      { icon: "💬", label: "Comment received", sub: "Instagram", render: (d, input) => input },
-      { icon: "🧠", label: "Understands it", sub: "What they want", ai: true,
-        render: (d) => `${d.intent ?? "—"} · ${d.sentiment ?? "—"}` },
+      { icon: "📩", label: "Message received", sub: "Instagram or WhatsApp", render: (d, input) => input },
+      { icon: "🧠", label: "Understands it", sub: "Intent and interest", ai: true,
+        render: (d) => `${d.intent ?? "—"} · ${d.temperature ?? "—"}` },
       { icon: "✍️", label: "Writes reply", sub: "In your voice", render: (d) => d.reply ?? "—" },
-      { icon: "📤", label: "Posts reply", sub: "Public reply", render: () => "Reply posted ✓" },
+      { icon: "📤", label: "Sends reply", sub: "Within seconds", render: () => "Reply sent ✓" },
     ],
     finalText: (d) => d.reply ?? "—",
   },
   {
-    id: "dm",
+    id: "followup",
     num: "02",
-    title: "Lead capture from DMs",
-    desc: "Someone sends you a message asking about your service. If you take hours to answer, they buy from someone else. This answers, asks the right question, and gets them to book.",
+    title: "Follow-ups with recommended messages",
+    desc: "Most sales happen after the third or fourth message, but most people never send one. This reads where the conversation stopped and suggests the next message to send.",
     points: [
-      "Starts when someone sends a set keyword",
-      "Asks one simple question to learn what they need",
-      "Saves every good lead and sends them your booking link",
+      "Finds leads who have gone quiet",
+      "Recommends the next message based on where things stopped",
+      "You approve each message before it goes out",
     ],
     samples: [
-      { id: "d1", label: "Wants growth", text: "Hi, I saw your post. I want to grow my Instagram, I have about 6 months." },
-      { id: "d2", label: "Just curious", text: "Just curious how this works" },
-      { id: "d3", label: "Urgent, tight budget", text: "I run a small shop and need more customers this month. Budget is tight but I'm serious." },
+      { id: "f1", label: "Budget concern", text: "Thanks for the quote. I need to think about the budget first." },
+      { id: "f2", label: "Undecided", text: "Still looking at options, will update you soon" },
+      { id: "f3", label: "Positive, silent", text: "Sounds good, I'll think about it" },
     ],
     nodes: [
-      { icon: "📩", label: "Message received", sub: "Keyword matched", render: (d, input) => input },
-      { icon: "🧠", label: "Checks if they're a fit", sub: "Their goal", ai: true,
-        render: (d) => `${d.intent ?? "—"} · Score ${d.lead_score ?? "—"}/10` },
-      { icon: "✍️", label: "Writes reply", sub: "One simple question", render: (d) => d.reply ?? "—" },
-      { icon: "🗂️", label: "Saves lead", sub: "Sends booking link", render: (d) => `Saved (score ${d.lead_score ?? "—"}/10) · Link sent ✓` },
+      { icon: "⏱️", label: "No reply detected", sub: "After 48 hours", render: (d, input) => input },
+      { icon: "🧠", label: "Reads the chat", sub: "Where it stopped", ai: true,
+        render: (d) => d.stage ?? "—" },
+      { icon: "✍️", label: "Recommends message", sub: "You approve first", render: (d) => d.recommended_message ?? "—" },
+      { icon: "🗓️", label: "Queued", sub: "Sends at a good time", render: () => "Scheduled ✓" },
+    ],
+    finalText: (d) => d.recommended_message ?? "—",
+  },
+  {
+    id: "calls",
+    num: "03",
+    title: "Receiving calls",
+    desc: "Missed calls turn into missed customers. An AI receptionist picks up, answers what it can, and takes a message for anything that needs your team.",
+    points: [
+      "Answers every call, even after hours",
+      "Captures the caller's name and callback number",
+      "Sends urgent calls to your team straight away",
+    ],
+    samples: [
+      { id: "c1", label: "Emergency", text: "Hi, my kitchen sink is leaking badly and water is everywhere." },
+      { id: "c2", label: "Opening hours", text: "Hello, what time do you open on Saturday?" },
+      { id: "c3", label: "Booking a service", text: "I'd like to book a service for next week, what's available?" },
+    ],
+    nodes: [
+      { icon: "📞", label: "Call answered", sub: "First ring", render: (d, input) => input },
+      { icon: "🧠", label: "Understands caller", sub: "Need and urgency", ai: true,
+        render: (d) => `${d.intent ?? "—"} · ${d.urgency ?? "—"} urgency` },
+      { icon: "🗒️", label: "Captures details", sub: "Name and callback", render: (d) => d.reply ?? "—" },
+      { icon: "🔀", label: "Routes call", sub: "Urgent to your team",
+        render: (d) => d.urgency === "high" ? "Sent to your team ✓" : "Logged for callback ✓" },
     ],
     finalText: (d) => d.reply ?? "—",
   },
   {
-    id: "enquiry",
-    num: "03",
-    title: "Inbound enquiry router",
-    desc: "Customers ask questions at night, on weekends, and while you're busy. Unanswered questions turn into lost sales. This answers them from your own information and passes anything unclear to a real person.",
+    id: "booking",
+    num: "04",
+    title: "Viewing bookings",
+    desc: "Customers check availability and book inside the chat. Your calendar stays current, and confirmations go out without anyone typing them.",
     points: [
-      "Answers only from information you approve",
-      "Checks how sure it is before replying",
-      "Sends unclear questions to your team with a short summary",
+      "Shows open times that fit the request",
+      "Confirms the booking in the same chat",
+      "Keeps your calendar and reminders up to date",
     ],
     samples: [
-      { id: "e1", label: "Hours (not in info)", text: "What are your opening hours on Saturday?" },
-      { id: "e2", label: "Service question", text: "Do you offer Service B and how long does it take?" },
-      { id: "e3", label: "Custom legal request", text: "I need a custom contract for a 2 year deal with my company's legal terms." },
+      { id: "b1", label: "Friday afternoon", text: "Can I book a consultation this Friday afternoon?" },
+      { id: "b2", label: "Early slot", text: "Do you have anything at 8am tomorrow?" },
+      { id: "b3", label: "Reschedule", text: "Can I move my appointment from Monday to Wednesday?" },
     ],
     nodes: [
-      { icon: "🌐", label: "Question received", sub: "Website chat", render: (d, input) => input },
-      { icon: "🧠", label: "Looks up answer", sub: "From your info", ai: true,
-        render: (d) => `${d.intent ?? "—"} · Sure ${d.confidence != null ? Math.round(d.confidence * 100) + "%" : "—"}` },
-      { icon: "🔀", label: "Decides", sub: "Answer or hand off",
-        render: (d) => (d.confidence ?? 0) >= 0.6 ? "Sure enough → answer" : "Not sure → send to a person" },
-      { icon: "📤", label: "Sends reply", sub: "Back to the chat",
-        render: (d) => (d.confidence ?? 0) >= 0.6 ? "Answer sent ✓" : `Team notified: ${d.summary ?? "—"}` },
+      { icon: "💬", label: "Booking request", sub: "In the chat", render: (d, input) => input },
+      { icon: "🧠", label: "Reads request", sub: "Date and time", ai: true,
+        render: (d) => d.intent ?? "—" },
+      { icon: "📅", label: "Checks calendar", sub: "Live availability",
+        render: (d) => d.slot === "available" ? "Slot free ✓" : "Offers other times" },
+      { icon: "✅", label: "Confirms booking", sub: "Sends confirmation", render: (d) => d.reply ?? "—" },
     ],
-    finalText: (d) => (d.confidence ?? 0) >= 0.6
-      ? (d.answer || "—")
-      : "Let me connect you with a team member who can help with this.",
+    finalText: (d) => d.reply ?? "—",
+  },
+  {
+    id: "qualify",
+    num: "05",
+    title: "Lead qualification",
+    desc: "Before your team gets involved, the AI asks the questions that matter: budget, timeline and what the lead actually needs. Only ready leads reach your calendar.",
+    points: [
+      "Asks one question at a time to learn the lead's need",
+      "Scores each lead from 1 to 10",
+      "Passes hot leads to your team with a summary",
+    ],
+    samples: [
+      { id: "q1", label: "Clinic, urgent", text: "We run a dental clinic and want to automate appointment booking this month." },
+      { id: "q2", label: "Just exploring", text: "Just exploring ideas for my shop, no timeline yet." },
+      { id: "q3", label: "Budget and timeline", text: "We have a budget of about 20k a month and want to start next week." },
+    ],
+    nodes: [
+      { icon: "📩", label: "Lead arrives", sub: "Any channel", render: (d, input) => input },
+      { icon: "🧠", label: "Scores lead", sub: "Need, budget, timeline", ai: true,
+        render: (d) => `Score ${d.lead_score ?? "—"}/10 · ${d.intent ?? "—"}` },
+      { icon: "✍️", label: "Asks next question", sub: "One at a time", render: (d) => d.reply ?? "—" },
+      { icon: "🗂️", label: "Saves lead", sub: "Hot leads to team",
+        render: (d) => (d.lead_score ?? 0) >= 7 ? "Passed to team ✓" : "Kept for nurturing ✓" },
+    ],
+    finalText: (d) => d.reply ?? "—",
+  },
+  {
+    id: "reviews",
+    num: "06",
+    title: "Reviews and referrals",
+    desc: "After a job is done, the AI asks how it went. Happy customers get a review link and a referral invite. Unhappy ones reach you privately before they post anywhere.",
+    points: [
+      "Follows up after each completed job",
+      "Asks happy customers for a review and a referral",
+      "Routes unhappy replies to you privately",
+    ],
+    samples: [
+      { id: "r1", label: "Happy customer", text: "Great service, the team was so kind and quick!" },
+      { id: "r2", label: "Mixed feelings", text: "The job was fine but it took longer than I expected." },
+      { id: "r3", label: "Unhappy", text: "I'm not happy. The work wasn't finished properly." },
+    ],
+    nodes: [
+      { icon: "💬", label: "Customer replies", sub: "After the job", render: (d, input) => input },
+      { icon: "🧠", label: "Reads the mood", sub: "Happy or unhappy", ai: true,
+        render: (d) => d.sentiment ?? "—" },
+      { icon: "✍️", label: "Writes reply", sub: "Next step", render: (d) => d.reply ?? "—" },
+      { icon: "🔀", label: "Routes it", sub: "Public or private",
+        render: (d) => d.sentiment === "negative" ? "Sent to you privately ✓" : "Review link sent ✓" },
+    ],
+    finalText: (d) => d.reply ?? "—",
   },
 ];
 
@@ -124,9 +196,9 @@ function buildWorkflow(wf) {
           </div>${i < wf.nodes.length - 1 ? '<div class="link"></div>' : ""}`).join("")}
       </div>
       <div class="bottom">
-        <div class="bubble">
-          <span class="bubble-label">Final reply</span>
-          <p class="bubble-text">Press run to see it work.</p>
+        <div class="thread">
+          <div class="bubble in"><span class="bubble-label">Incoming</span><p class="in-text"></p></div>
+          <div class="bubble out"><span class="bubble-label">Reply</span><p class="out-text">Press run to see it work.</p></div>
         </div>
         <button class="btn primary run">Run preview</button>
       </div>
@@ -137,38 +209,44 @@ function buildWorkflow(wf) {
       if (article.dataset.busy) return;
       article.dataset.sample = chip.dataset.id;
       article.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === chip));
-      resetCanvas(article);
+      resetCanvas(wf, article);
     });
   });
   article.querySelector(".run").addEventListener("click", () => runWorkflow(wf, article));
+  resetCanvas(wf, article);
   return article;
 }
 
-function resetCanvas(article) {
+function currentSample(wf, article) {
+  return wf.samples.find((s) => s.id === article.dataset.sample) || wf.samples[0];
+}
+
+function resetCanvas(wf, article) {
   article.querySelectorAll(".node").forEach((n) => {
     n.classList.remove("running", "done");
     n.querySelector(".out").textContent = "Waiting";
   });
   article.querySelectorAll(".link").forEach((l) => l.classList.remove("lit"));
-  article.querySelector(".bubble-text").textContent = "Press run to see it work.";
+  article.querySelector(".in-text").textContent = currentSample(wf, article).text;
+  article.querySelector(".out-text").textContent = "Press run to see it work.";
 }
 
 async function runWorkflow(wf, article) {
   if (article.dataset.busy) return;
   article.dataset.busy = "1";
 
-  const sample = wf.samples.find((s) => s.id === article.dataset.sample);
+  const sample = currentSample(wf, article);
   const nodes = [...article.querySelectorAll(".node")];
   const links = [...article.querySelectorAll(".link")];
   const runBtn = article.querySelector(".run");
-  const bubble = article.querySelector(".bubble-text");
+  const outText = article.querySelector(".out-text");
   const chips = article.querySelectorAll(".chip");
   const aiIndex = wf.nodes.findIndex((n) => n.ai);
 
   runBtn.disabled = true;
   runBtn.textContent = "Running…";
   chips.forEach((c) => (c.disabled = true));
-  resetCanvas(article);
+  resetCanvas(wf, article);
 
   let pending = null;
   let data = null;
@@ -193,7 +271,7 @@ async function runWorkflow(wf, article) {
     node.querySelector(".out").textContent = cfg.render(data || {}, sample.text);
   }
 
-  bubble.textContent = data ? wf.finalText(data, sample.text) : "Preview unavailable right now. Try again in a moment.";
+  outText.textContent = data ? wf.finalText(data, sample.text) : "Preview unavailable right now. Try again in a moment.";
   runBtn.disabled = false;
   runBtn.textContent = "Run again";
   chips.forEach((c) => (c.disabled = false));

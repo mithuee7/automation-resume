@@ -3,64 +3,64 @@
 // is generated at most once globally. A per-IP limit guards against abuse.
 
 const WORKFLOW_PROMPTS = {
-  comment: `You manage public comments on a business's Instagram or Facebook posts.
-Classify the comment, then write a short, warm public reply (1-2 sentences).
-Never invent prices, links or policies. If details are needed, say they will be sent in DM.
-Respond with JSON only: {"intent": "<short label>", "sentiment": "positive" | "neutral" | "negative", "reply": "<reply>"}`,
+  instant: `You reply to new Instagram or WhatsApp messages for a small service business.
+Reply in 1-2 short, warm sentences, and rate the lead as hot, warm or cold.
+Never invent prices, dates or policies. If unsure, offer to check and follow up.
+Respond with JSON only: {"intent": "<short label>", "temperature": "hot" | "warm" | "cold", "reply": "<message>"}`,
 
-  dm: `You qualify people who DM a business after replying to a keyword.
-Work out their goal and timeline, then ask ONE friendly qualifying question.
-Score the lead from 1 to 10. Never invent prices or links.
-Respond with JSON only: {"intent": "<short label>", "lead_score": <integer 1-10>, "reply": "<DM reply>"}`,
+  followup: `You write follow-up messages for leads who have gone quiet.
+Read the last messages, work out where the conversation stopped, and write ONE short, friendly follow-up that adds value and does not pressure.
+Never invent prices or policies.
+Respond with JSON only: {"stage": "<where the conversation stopped>", "recommended_message": "<follow-up message>"}`,
 
-  enquiry: `You answer website chat enquiries for a placeholder business.
-Placeholder knowledge base: services = "Service A, Service B, Service C"; hours = "Mon-Fri 9am-6pm"; contact = "team@example.com".
-Only answer from this knowledge base. If you are not sure, set confidence low.
-Respond with JSON only: {"intent": "<short label>", "confidence": <number between 0 and 1>, "answer": "<reply>", "summary": "<one-line summary for a human agent>"}`,
+  calls: `You are the AI receptionist answering a phone call for a small business. The caller's words are given as a transcript.
+Write what you say next on the call, in 1-2 sentences. Ask for a name and callback number if they are missing.
+Mark urgency high only for emergencies or same-day problems.
+Respond with JSON only: {"intent": "<short label>", "urgency": "high" | "normal", "reply": "<what you say on the call>"}`,
+
+  booking: `You handle booking requests in a business chat. Offer times that fit the request and confirm one when it works.
+Keep it to 1-2 sentences.
+Respond with JSON only: {"intent": "<short label>", "slot": "available" | "unavailable", "reply": "<message>"}`,
+
+  qualify: `You qualify a new lead for a small business. Ask ONE question to learn their budget, timeline or need, and score the lead.
+Never invent prices.
+Respond with JSON only: {"intent": "<short label>", "lead_score": <integer 1-10>, "reply": "<message>"}`,
+
+  reviews: `You reply to a customer's answer after they used a business's service.
+If they are happy, thank them and invite a review. If they are unhappy, apologise and offer a private fix instead of a public review.
+Respond with JSON only: {"sentiment": "positive" | "neutral" | "negative", "reply": "<message>"}`,
 };
 
 const SAMPLES = {
-  comment: {
-    c1: {
-      text: "Hey! How much does this cost? 👀",
-      fallback: { intent: "pricing question", sentiment: "neutral", reply: "Great question! We'll send you the details in your DMs 💬" },
-    },
-    c2: {
-      text: "Love this so much, your content is always 🔥",
-      fallback: { intent: "compliment", sentiment: "positive", reply: "Thank you, that means a lot! More coming this week 🙌" },
-    },
-    c3: {
-      text: "I ordered 3 days ago and still no reply from anyone.",
-      fallback: { intent: "complaint, delayed response", sentiment: "negative", reply: "Sorry for the wait, we're on it. Please check your DMs, we'll sort this out for you." },
-    },
+  instant: {
+    l1: { text: "Hi! Do you have any slots this week?", fallback: { intent: "availability", temperature: "hot", reply: "Hi! Yes, we have a few openings this week. Which day suits you best?" } },
+    l2: { text: "How much is the basic package?", fallback: { intent: "pricing question", temperature: "warm", reply: "Happy to help! A quick call lets us give you the right price. Want to book one?" } },
+    l3: { text: "Just browsing, thanks", fallback: { intent: "browsing", temperature: "cold", reply: "Glad you stopped by! Send any questions here anytime." } },
   },
-  dm: {
-    d1: {
-      text: "Hi, I saw your post. I want to grow my Instagram, I have about 6 months.",
-      fallback: { intent: "growth enquiry", lead_score: 7, reply: "Love that you're thinking long term! Quick question: what would success look like for you in 6 months?" },
-    },
-    d2: {
-      text: "Just curious how this works",
-      fallback: { intent: "general curiosity", lead_score: 3, reply: "Happy to explain! What are you hoping to get out of it, more leads, more sales or more reach?" },
-    },
-    d3: {
-      text: "I run a small shop and need more customers this month. Budget is tight but I'm serious.",
-      fallback: { intent: "urgent need, tight budget", lead_score: 8, reply: "That's a great place to start. Would it help if we looked at a quick plan that fits your budget?" },
-    },
+  followup: {
+    f1: { text: "Thanks for the quote. I need to think about the budget first.", fallback: { stage: "quote sent, budget concern", recommended_message: "Totally fair. Would a smaller starter package help? I can send two options that fit a tighter budget." } },
+    f2: { text: "Still looking at options, will update you soon", fallback: { stage: "undecided, no timeline", recommended_message: "No rush at all. Would a short comparison you can look at later help?" } },
+    f3: { text: "Sounds good, I'll think about it", fallback: { stage: "positive but silent", recommended_message: "Glad it sounds good. Would Thursday or Friday work for a quick call to lock it in?" } },
   },
-  enquiry: {
-    e1: {
-      text: "What are your opening hours on Saturday?",
-      fallback: { intent: "opening hours", confidence: 0.4, answer: "We're open Monday to Friday, 9am to 6pm.", summary: "Visitor asked about Saturday hours, not in knowledge base." },
-    },
-    e2: {
-      text: "Do you offer Service B and how long does it take?",
-      fallback: { intent: "service details", confidence: 0.9, answer: "Yes, we offer Service B. Timelines depend on scope, so our team will confirm the exact timing with you.", summary: "Service B enquiry, timing needs confirmation." },
-    },
-    e3: {
-      text: "I need a custom contract for a 2 year deal with my company's legal terms.",
-      fallback: { intent: "custom legal request", confidence: 0.2, answer: "", summary: "Custom contract request, requires human review." },
-    },
+  calls: {
+    c1: { text: "Hi, my kitchen sink is leaking badly and water is everywhere.", fallback: { intent: "emergency repair", urgency: "high", reply: "I'm sorry, that sounds urgent. Can I take your name and callback number so our team can call you right away?" } },
+    c2: { text: "Hello, what time do you open on Saturday?", fallback: { intent: "opening hours", urgency: "normal", reply: "Thanks for calling! We're open Monday to Friday, 9am to 6pm. Would you like me to take a message?" } },
+    c3: { text: "I'd like to book a service for next week, what's available?", fallback: { intent: "booking request", urgency: "normal", reply: "Sure, I can help. Which day next week works, and what's the best callback number?" } },
+  },
+  booking: {
+    b1: { text: "Can I book a consultation this Friday afternoon?", fallback: { intent: "consultation booking", slot: "available", reply: "Yes, Friday afternoon is open. Would 2:30 or 5:00 suit you?" } },
+    b2: { text: "Do you have anything at 8am tomorrow?", fallback: { intent: "early slot request", slot: "unavailable", reply: "We're not open at 8am, but 9:00 tomorrow is free. Shall I book that for you?" } },
+    b3: { text: "Can I move my appointment from Monday to Wednesday?", fallback: { intent: "reschedule", slot: "available", reply: "Of course. Wednesday at 11:00 is free. Want me to move your booking?" } },
+  },
+  qualify: {
+    q1: { text: "We run a dental clinic and want to automate appointment booking this month.", fallback: { intent: "clinic, urgent need", lead_score: 8, reply: "Thanks, that helps. Roughly how many bookings do you handle each week?" } },
+    q2: { text: "Just exploring ideas for my shop, no timeline yet.", fallback: { intent: "exploring", lead_score: 3, reply: "Great to hear! What task takes up the most of your time right now?" } },
+    q3: { text: "We have a budget of about 20k a month and want to start next week.", fallback: { intent: "budget and timeline", lead_score: 9, reply: "That's a clear plan. I'll pass your details to our team so they can call you today." } },
+  },
+  reviews: {
+    r1: { text: "Great service, the team was so kind and quick!", fallback: { sentiment: "positive", reply: "Thank you, that means a lot! Would you mind leaving a quick review? It really helps us." } },
+    r2: { text: "The job was fine but it took longer than I expected.", fallback: { sentiment: "neutral", reply: "Thanks for being honest. We'd like to make the next visit faster. Is there anything we could improve?" } },
+    r3: { text: "I'm not happy. The work wasn't finished properly.", fallback: { sentiment: "negative", reply: "I'm really sorry about that. A manager will contact you directly to put it right." } },
   },
 };
 

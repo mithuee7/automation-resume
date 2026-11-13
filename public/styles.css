@@ -164,7 +164,29 @@ a { color: inherit; text-decoration: none; }
   font-size: 32px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-.node.running .tile { border-color: var(--a); box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.14); }
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+/* Ring that travels around the running node */
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 25px;
+  padding: 3px;
+  background: conic-gradient(from var(--angle), transparent 0deg, transparent 210deg, var(--a) 280deg, var(--b) 320deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.node.running .tile::before { opacity: 1; animation: spin 1.2s linear infinite; }
+.node.running .tile { border-color: transparent; box-shadow: 0 0 34px rgba(167, 139, 250, 0.3); }
+@keyframes spin { to { --angle: 360deg; } }
 .node.done .tile { border-color: rgba(34, 211, 238, 0.45); }
 
 .badge {
@@ -281,3 +303,16 @@ a { color: inherit; text-decoration: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* Chat-style result thread */
+.thread { flex: 1; display: grid; gap: 10px; min-width: 0; }
+.bubble.in { border-radius: 16px 16px 16px 4px; }
+.bubble.out {
+  border-radius: 16px 16px 4px 16px;
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.35);
+  margin-left: 22%;
+}
+.in-text, .out-text { color: var(--text); font-size: 0.95rem; word-break: break-word; }
+.in-text { color: var(--muted); }
+@media (max-width: 560px) { .bubble.out { margin-left: 0; } }
